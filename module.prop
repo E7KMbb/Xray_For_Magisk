@@ -1,0 +1,6 @@
+id=xray_for_magisk
+name=Xray for Magisk
+version=latest_version
+versionCode=20201130
+author=core:rprx
+description=Xray core with service scripts for Magisk
