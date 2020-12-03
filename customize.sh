@@ -57,7 +57,7 @@ case "${ARCH}" in
 esac
 
 if [ ${command_judgment} == "true" ]; then
-    curl "${download_xray_link}" -k -L -o "${download_xray_zip}" >&2
+    curl "${download_xray_link}" -k -L -o "${download_xray_zip}"
 else
     wget --no-check-certificate -O "${download_xray_zip}" "${download_xray_link}"
 fi
@@ -68,36 +68,38 @@ fi
 
 # install xray execute file
 ui_print "- Install xray core $ARCH execute files"
-unzip -j -o "${download_xray_zip}" "geoip.dat" -d /data/xray >&2
-unzip -j -o "${download_xray_zip}" "geosite.dat" -d /data/xray >&2
-unzip -j -o "${download_xray_zip}" "xray" -d $MODPATH/system/bin >&2
-unzip -j -o "${ZIPFILE}" 'xray/scripts/*' -d $MODPATH/scripts >&2
-unzip -j -o "${ZIPFILE}" "xray/bin/$ARCH/dnscrypt-proxy" -d $MODPATH/system/bin >&2
-unzip -j -o "${ZIPFILE}" 'service.sh' -d $MODPATH >&2
-unzip -j -o "${ZIPFILE}" 'uninstall.sh' -d $MODPATH >&2
-rm "${download_xray_zip}"
+unzip -j -o "${ZIPFILE}" -x 'META-INF/*' -d $MODPATH >&2
+tar -xf $MODPATH/xray.tar.xz -C $TMPDIR
+mv $TMPDIR/xray/scripts/* $MODPATH/scripts
+mv $TMPDIR/xray/bin/$ARCH/dnscrypt-proxy $MODPATH/system/bin
+unzip -j -o "${download_xray_zip}" "geoip.dat" -d /data/xray
+unzip -j -o "${download_xray_zip}" "geosite.dat" -d /data/xray
+unzip -j -o "${download_xray_zip}" "xray" -d $MODPATH/system/bin
+
+rm -rf $MODPATH/xray.tar.xz
+rm -rf "${download_xray_zip}"
 # copy xray data and config
 ui_print "- Copy xray config and data files"
 [ -f /data/xray/softap.list ] || \
 echo "192.168.43.0/24" > /data/xray/softap.list
 [ -f /data/xray/resolv.conf ] || \
-unzip -j -o "${ZIPFILE}" "xray/etc/resolv.conf" -d /data/xray >&2
-unzip -j -o "${ZIPFILE}" "xray/etc/config.json.template" -d /data/xray >&2
+mv $TMPDIR/xray/etc/resolv.conf /data/xray
+mv $TMPDIR/xray/etc/config.json.template /data/xray
 [ -f /data/xray/dnscrypt-proxy/dnscrypt-blacklist-domains.txt ] || \
-unzip -j -o "${ZIPFILE}" 'xray/etc/dnscrypt-proxy/dnscrypt-blacklist-domains.txt' -d /data/xray/dnscrypt-proxy >&2
+mv $TMPDIR/xray/etc/dnscrypt-proxy/dnscrypt-blacklist-domains.txt /data/xray/dnscrypt-proxy
 [ -f /data/xray/dnscrypt-proxy/dnscrypt-blacklist-ips.txt ] || \
-unzip -j -o "${ZIPFILE}" 'xray/etc/dnscrypt-proxy/dnscrypt-blacklist-ips.txt' -d /data/xray/dnscrypt-proxy >&2
+mv $TMPDIR/xray/etc/dnscrypt-proxy/dnscrypt-blacklist-ips.txt /data/xray/dnscrypt-proxy
 [ -f /data/xray/dnscrypt-proxy/dnscrypt-cloaking-rules.txt ] || \
-unzip -j -o "${ZIPFILE}" 'xray/etc/dnscrypt-proxy/dnscrypt-cloaking-rules.txt' -d /data/xray/dnscrypt-proxy >&2
+mv $TMPDIR/xray/etc/dnscrypt-proxy/dnscrypt-cloaking-rules.txt /data/xray/dnscrypt-proxy
 [ -f /data/xray/dnscrypt-proxy/dnscrypt-forwarding-rules.txt ] || \
-unzip -j -o "${ZIPFILE}" 'xray/etc/dnscrypt-proxy/dnscrypt-forwarding-rules.txt' -d /data/xray/dnscrypt-proxy >&2
+mv $TMPDIR/xray/etc/dnscrypt-proxy/dnscrypt-forwarding-rules.txt /data/xray/dnscrypt-proxy
 [ -f /data/xray/dnscrypt-proxy/dnscrypt-proxy.toml ] || \
-unzip -j -o "${ZIPFILE}" 'xray/etc/dnscrypt-proxy/dnscrypt-proxy.toml' -d /data/xray/dnscrypt-proxy >&2
+mv $TMPDIR/xray/etc/dnscrypt-proxy/dnscrypt-proxy.toml /data/xray/dnscrypt-proxy
 [ -f /data/xray/dnscrypt-proxy/dnscrypt-whitelist.txt ] || \
-unzip -j -o "${ZIPFILE}" 'xray/etc/dnscrypt-proxy/dnscrypt-whitelist.txt' -d /data/xray/dnscrypt-proxy >&2
+mv $TMPDIR/xray/etc/dnscrypt-proxy/dnscrypt-whitelist.txt /data/xray/dnscrypt-proxy
 [ -f /data/xray/dnscrypt-proxy/example-dnscrypt-proxy.toml ] || \
-unzip -j -o "${ZIPFILE}" 'xray/etc/dnscrypt-proxy/example-dnscrypt-proxy.toml' -d /data/xray/dnscrypt-proxy >&2
-unzip -j -o "${ZIPFILE}" 'xray/etc/dnscrypt-proxy/update-rules.sh' -d /data/xray/dnscrypt-proxy >&2
+mv $TMPDIR/xray/etc/dnscrypt-proxy/example-dnscrypt-proxy.toml /data/xray/dnscrypt-proxy
+mv $TMPDIR/xray/etc/dnscrypt-proxy/update-rules.sh /data/xray/dnscrypt-proxy
 [ -f /data/xray/config.json ] || \
 cp /data/xray/config.json.template /data/xray/config.json
 ln -s /data/xray/resolv.conf $MODPATH/system/etc/resolv.conf
